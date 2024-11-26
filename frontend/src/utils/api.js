@@ -13,8 +13,8 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-export const login = (data) => API.post("/auth/login", data);
-export const signup = (data) => API.post("/auth/signup", data);
-export const fetchTransactions = (params) => API.get("/transactions", { params });
-export const fetchSummary = () => API.get("/summary");
+export const login = (data) => API.post("http://localhost:5000/api/auth/login", data);
+export const signup = (data) => API.post("http://localhost:5000/api/auth/signup", data);
+export const fetchTransactions = (params) => API.get("http://localhost:5000/api/transactions", { params });
+export const fetchSummary = () => API.get("http://localhost:5000/api/summary");
 export const createTransaction = (data) => API.post("/transactions/transfer", data);
