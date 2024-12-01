@@ -214,6 +214,11 @@ export default function Dashboard() {
     }
   };
 
+
+
+  console.log(users);
+  
+
   const handleUserSelection = (user) => {
     setSelectedReceiver(user);
     setIsUserModalOpen(false);
@@ -229,8 +234,8 @@ export default function Dashboard() {
       const response = await axios.post(
         "http://localhost:5000/api/transactions/transfer",
         {
-          sender: "Logged-in User ID", // Replace with logged-in user's ID
-          receiver: selectedReceiver.id,
+          sender: userIds, // Replace with logged-in user's ID
+          receiver: selectedReceiver._id,
           amount,
         },
         {
