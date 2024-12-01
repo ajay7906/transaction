@@ -5,7 +5,7 @@ const stripe = require("stripe")('sk_test_51Q7ZmIP8a9YwaGKMYiaRiWC3iBoYymkTqqdy3
 require('dotenv').config();
 
 const router = express.Router();
-console.log(process.env.STRIPE_SECRET_KEY);
+//console.log(process.env.STRIPE_SECRET_KEY);
 
 
 
@@ -93,15 +93,44 @@ module.exports = router;
 // });
 
 // Create Transaction
+
+
+
+// router.post("/transfer", authenticate, async (req, res) => {
+//   const { sender, receiver, amount } = req.body;
+//   try {
+//     const paymentIntent = await stripe.paymentIntents.create({
+//       amount: amount * 100, // Stripe uses smallest currency unit
+//       currency: "usd",
+//       payment_method_types: ["card"],
+//     });
+
+//     const transaction = await Transaction.create({
+//       sender,
+//       receiver,
+//       amount,
+//       status: "successful",
+//       type: "debit",
+//     });
+
+//     res.status(201).json(transaction);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+const { io } = require("../server");
+
 router.post("/transfer", authenticate, async (req, res) => {
   const { sender, receiver, amount } = req.body;
   try {
+    // Create a payment intent with Stripe
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Stripe uses smallest currency unit
+      amount: amount * 100, // Stripe uses the smallest currency unit (e.g., cents for USD)
       currency: "usd",
       payment_method_types: ["card"],
     });
 
+    // Create a transaction record in the database
     const transaction = await Transaction.create({
       sender,
       receiver,
@@ -110,6 +139,15 @@ router.post("/transfer", authenticate, async (req, res) => {
       type: "debit",
     });
 
+    // Emit a socket event to notify the recipient about the transaction
+    io.to(receiver).emit("newTransaction", {
+      sender: sender, 
+      receiver: receiver,
+      amount: amount,
+      message: `You have received ${amount} from ${sender.name}`,
+    });
+
+    // Send the response back with the transaction details
     res.status(201).json(transaction);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -120,7 +158,29 @@ router.post("/transfer", authenticate, async (req, res) => {
 
 
 
-router.get("/transaction", async (req, res) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.get("/transaction",authenticate,  async (req, res) => {
   try {
     const summary = await Transaction.aggregate([
       {

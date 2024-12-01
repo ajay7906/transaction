@@ -60,7 +60,7 @@ const authenticate = (req, res, next) => {
 
   // Extract the token by removing "Bearer " from the authorization header
   const token = authHeader.split(" ")[1];
-
+    log(token);
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Store decoded token payload in req.user
