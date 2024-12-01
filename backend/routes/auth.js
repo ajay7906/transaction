@@ -30,4 +30,76 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+
+// get all user
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find({}, { password: 0 }); // Exclude passwords from response
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
