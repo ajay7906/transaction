@@ -120,6 +120,77 @@ router.post("/transfer", authenticate, async (req, res) => {
 
 
 
+router.get("/transaction", async (req, res) => {
+  try {
+    const summary = await Transaction.aggregate([
+      {
+        $group: {
+          _id: null, // Groups all transactions
+          totalVolume: { $sum: "$amount" }, // Total sum of transaction amounts
+          totalTransactions: { $sum: 1 }, // Total number of transactions
+          avgTransactionSize: { $avg: "$amount" }, // Average transaction size
+          totalSenders: { $addToSet: "$sender" }, // Unique senders
+          totalReceivers: { $addToSet: "$receiver" }, // Unique receivers
+          successfulCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "successful"] }, 1, 0],
+            },
+          },
+          pendingCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "pending"] }, 1, 0],
+            },
+          },
+          failedCount: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "failed"] }, 1, 0],
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude group ID from result
+          totalVolume: 1,
+          totalTransactions: 1,
+          avgTransactionSize: 1,
+          totalUsers: {
+            $size: { $setUnion: ["$totalSenders", "$totalReceivers"] }, // Unique users count
+          },
+          statusBreakdown: {
+            successful: "$successfulCount",
+            pending: "$pendingCount",
+            failed: "$failedCount",
+          },
+        },
+      },
+    ]);
+
+    res.status(200).json(summary[0] || {
+      totalVolume: 0,
+      totalTransactions: 0,
+      avgTransactionSize: 0,
+      totalUsers: 0,
+      statusBreakdown: {
+        successful: 0,
+        pending: 0,
+        failed: 0,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching transaction summary:", error);
+    res.status(500).json({ error: "Failed to fetch all transaction summary." });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 
 module.exports = router;

@@ -51,7 +51,8 @@ const jwt = require("jsonwebtoken");
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
-
+   console.log(authHeader);
+   
   // Check if the authorization header is present
   if (!authHeader) {
     return res.status(401).json({ error: "Access denied" });
